@@ -34,7 +34,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['profile_photo', 'display_name', 'bio']
 
-class UserDetailsSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer()
     class Meta:
         model = User
@@ -55,4 +55,3 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         profile.save()
 
         return instance
-        
