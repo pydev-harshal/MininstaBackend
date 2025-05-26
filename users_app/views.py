@@ -42,7 +42,7 @@ class UserProfileView(generics.RetrieveAPIView):
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
-    serializer_class = serailizers.UserDetailSerializer
+    serializer_class = serailizers.UserSearchSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['first_name', 'last_name', 'username', 'email', 'profile__display_name']

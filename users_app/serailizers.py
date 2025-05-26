@@ -38,7 +38,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer()
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'profile']
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'profile']
 
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -55,3 +55,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
         profile.save()
 
         return instance
+
+class UserSearchSerializer(serializers.ModelSerializer):
+    display_name = serializers.CharField(source='profile.display_name')
+    url = serializers.HyperlinkedIdentityField(view_name='user-profile', lookup_field='username')
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'display_name', 'url']
