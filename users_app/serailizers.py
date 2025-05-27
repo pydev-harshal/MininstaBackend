@@ -29,13 +29,21 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
         return user
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
+    following_count = serializers.SerializerMethodField()
+    followers_count = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ['profile_photo', 'display_name', 'bio']
-
+        fields = ['profile_photo', 'display_name', 'bio', 'following_count', 'followers_count']
+    
+    def get_following_count(self, instance):
+        return instance.following.count()
+    
+    def get_followers_count(self, instance):
+        return instance.user.profiles.count()
+    
 class UserDetailSerializer(serializers.ModelSerializer):
-    profile = UserProfileSerializer()
+    profile = ProfileSerializer()
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'profile']
@@ -56,9 +64,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
         return instance
 
-class UserSearchSerializer(serializers.ModelSerializer):
+class UserSearchResultSerializer(serializers.ModelSerializer):
     display_name = serializers.CharField(source='profile.display_name')
-    url = serializers.HyperlinkedIdentityField(view_name='user-profile', lookup_field='username')
+    url = serializers.HyperlinkedIdentityField(view_name='user-detail', lookup_field='username')
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'display_name', 'url']
