@@ -16,11 +16,18 @@ class UserCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'profile', 'password', 'confirm_password']
         extra_kwargs = {
             'password': {'write_only': True},
-            'email': {
-                'required': False,
-                'validators': [UniqueValidator(queryset=User.objects.all())]
-            }
+            'email': {'required': True}
         }
+    
+    def validate_username(self, value):
+        if User.objects.filter(username=value.lower()).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+        return value
+    
+    def validate_email(self, value):
+        if User.objects.filter(email=value.lower()).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
 
     def validate_confirm_password(self, value):
         if 'password' in self.initial_data:
