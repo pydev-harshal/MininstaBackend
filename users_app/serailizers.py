@@ -3,11 +3,17 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from users_app.models import Profile
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['profile_photo', 'display_name', 'bio']
+
 class UserCreateSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only=True)
     confirm_password = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'password', 'confirm_password']
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'profile', 'password', 'confirm_password']
         extra_kwargs = {
             'password': {'write_only': True},
             'email': {
@@ -24,29 +30,28 @@ class UserCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('confirm_password')
-        user = User.objects.create(
+        user = User.objects.create_user(
             **validated_data
         )
         return user
-
-class ProfileSerializer(serializers.ModelSerializer):
-    following_count = serializers.SerializerMethodField()
-    followers_count = serializers.SerializerMethodField()
-    class Meta:
-        model = Profile
-        fields = ['profile_photo', 'display_name', 'bio', 'following_count', 'followers_count']
-    
-    def get_following_count(self, instance):
-        return instance.following.count()
-    
-    def get_followers_count(self, instance):
-        return instance.user.profiles.count()
     
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'profile']
+    
+    def validate_username(self, value):
+        user = self.instance 
+        if User.objects.exclude(pk=user.pk).filter(username=value.lower()).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+        return value
+    
+    def validate_email(self, value):
+        user = self.instance 
+        if User.objects.exclude(pk=user.pk).filter(email=value.lower()).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
 
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -63,10 +68,3 @@ class UserDetailSerializer(serializers.ModelSerializer):
         profile.save()
 
         return instance
-
-class UserSearchResultSerializer(serializers.ModelSerializer):
-    display_name = serializers.CharField(source='profile.display_name')
-    url = serializers.HyperlinkedIdentityField(view_name='user-detail', lookup_field='username')
-    class Meta:
-        model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'display_name', 'url']

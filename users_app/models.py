@@ -6,7 +6,6 @@ class Profile(models.Model):
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     display_name = models.CharField(max_length=100, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    following = models.ManyToManyField(User, related_name='profiles', blank=True)
 
     def __str__(self):
         return str(self.user)

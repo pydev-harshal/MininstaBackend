@@ -15,3 +15,5 @@ def user_postsave(sender, instance, created, **kwargs):
 def user_presave(sender, instance, **kwargs):
     if instance.username:
         instance.username = instance.username.lower()
+    if instance.email:
+        instance.email = instance.email.lower()
