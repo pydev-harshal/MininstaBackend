@@ -1,6 +1,9 @@
+from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from users_app.models import User, Profile
+from users_app.models import User, Profile, UserFollow
 from users_app import serailizers
 
 class UserProfileCreateView(generics.CreateAPIView):
@@ -12,7 +15,7 @@ class UserProfileCreateView(generics.CreateAPIView):
 class UserProfileDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = serailizers.UserProfileDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     lookup_field ='username'
 
 
@@ -32,3 +35,22 @@ class UserProfileDeleteView(generics.RetrieveDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+            
+            
+class UserFollowersListView(generics.ListAPIView):
+    serializer_class = serailizers.UserFollowersListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = get_object_or_404 (User, username=self.kwargs['username'])
+        return user.followers.all()
+
+
+class UserFollowingListView(generics.ListAPIView):
+    serializer_class = serailizers.UserFollowingListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = get_object_or_404 (User, username=self.kwargs['username'])
+        return user.following.all()
+    

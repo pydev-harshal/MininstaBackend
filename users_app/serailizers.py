@@ -1,6 +1,7 @@
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
-from users_app.models import User,Profile
+from users_app.models import User, Profile, UserFollow
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,6 +11,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserProfileCreateSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'full_name', 'username', 'email', 'password', 'profile']
@@ -37,13 +39,31 @@ class UserProfileCreateSerializer(serializers.ModelSerializer):
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
+    followers_count = serializers.SerializerMethodField(read_only=True)
+    following_count = serializers.SerializerMethodField(read_only=True)
+    is_following = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'username', 'email', 'profile']
+        fields = ['id', 'full_name', 'username', 'email', 'profile', 'followers_count', 'following_count', 'is_following']
+    
+    def get_is_following(self, instance):
+        print(self.context)
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return UserFollow.objects.filter(follower=request.user, following=instance).exists()
+        return False
+    
+    def get_followers_count(self, instance):
+        return instance.followers.count()
+
+    def get_following_count(self, instance):
+        return instance.following.count()
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
+
     class Meta:
         model = User
         fields = ['id', 'full_name', 'username', 'email', 'profile']
@@ -76,3 +96,19 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         profile.save()
 
         return instance
+
+
+class UserFollowersListSerializer(serializers.ModelSerializer):
+    follower = UserProfileDetailSerializer(read_only=True)
+
+    class Meta:
+        model = UserFollow
+        fields = ['follower']
+
+
+class UserFollowingListSerializer(serializers.ModelSerializer):
+    following = UserProfileDetailSerializer(read_only=True)
+    
+    class Meta:
+        model = UserFollow
+        fields = ['following']
