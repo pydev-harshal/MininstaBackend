@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.filters import SearchFilter
 from users_app.models import User, Profile, UserFollow
 from users_app import serailizers
 
@@ -40,6 +41,8 @@ class UserProfileDeleteView(generics.RetrieveDestroyAPIView):
 class UserFollowersListView(generics.ListAPIView):
     serializer_class = serailizers.UserFollowersListSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['follower__full_name', 'follower__username']
 
     def get_queryset(self):
         user = get_object_or_404 (User, username=self.kwargs['username'])
@@ -49,6 +52,8 @@ class UserFollowersListView(generics.ListAPIView):
 class UserFollowingListView(generics.ListAPIView):
     serializer_class = serailizers.UserFollowingListSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['follower__full_name', 'follower__username']
 
     def get_queryset(self):
         user = get_object_or_404 (User, username=self.kwargs['username'])
