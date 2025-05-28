@@ -8,11 +8,13 @@ class UserProfileCreateView(generics.CreateAPIView):
     serializer_class = serailizers.UserProfileCreateSerializer
     permission_classes = [AllowAny]
 
+
 class UserProfileDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = serailizers.UserProfileDetailView
     permission_classes = [IsAuthenticated]
     lookup_field ='username'
+
 
 class UserProfileUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
@@ -22,6 +24,7 @@ class UserProfileUpdateView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
     
+
 class UserProfileDeleteView(generics.RetrieveDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = serailizers.UserProfileDetailView

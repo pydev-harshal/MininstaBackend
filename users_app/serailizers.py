@@ -34,6 +34,7 @@ class UserProfileCreateSerializer(serializers.ModelSerializer):
         )
         return user
 
+
 class UserProfileDetailView(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
     class Meta:

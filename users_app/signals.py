@@ -9,6 +9,7 @@ def user_postsave(sender, instance, created, **kwargs):
             user = instance
         )
 
+
 @receiver(pre_save, sender=User)
 def user_presave(sender, instance, **kwargs):
     if instance.username:
