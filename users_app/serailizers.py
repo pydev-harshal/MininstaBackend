@@ -35,14 +35,14 @@ class UserProfileCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserProfileDetailView(serializers.ModelSerializer):
+class UserProfileDetailSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
     class Meta:
         model = User
         fields = ['id', 'full_name', 'username', 'email', 'profile']
 
 
-class UserProfileUpdateView(serializers.ModelSerializer):
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
     class Meta:
         model = User
